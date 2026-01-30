@@ -1,97 +1,60 @@
 {{- if eq .include_job "yes"}}
 # Job configuration for {{.project_name}}
-# Job Type: {{.job_type}}
-# Compute: {{.compute_type}}
 resources:
   jobs:
     {{.project_name}}_job:
       name: {{.project_name}}_job
 
       {{- if eq .job_type "python"}}
-
       tasks:
         - task_key: main_task
           {{- if eq .compute_type "serverless"}}
-          # Using serverless compute
           existing_cluster_id: ${var.serverless_cluster_id}
           {{- else}}
-          # Using classic compute with job cluster
           job_cluster_key: main_cluster
           {{- end}}
           spark_python_task:
             python_file: ../src/task.py
-            {{- if eq .enable_unity_catalog "yes"}}
-            parameters:
-              - "--catalog"
-              - "{{template "catalog_path" .}}"
-            {{- end}}
 
       {{- else if eq .job_type "notebook"}}
-
       tasks:
         - task_key: notebook_task
           {{- if eq .compute_type "serverless"}}
-          # Using serverless compute
           existing_cluster_id: ${var.serverless_cluster_id}
           {{- else}}
-          # Using classic compute with job cluster
           job_cluster_key: main_cluster
           {{- end}}
           notebook_task:
             notebook_path: ../src/notebook.py
-            base_parameters:
-              {{- if eq .enable_unity_catalog "yes"}}
-              catalog: "{{.catalog_name}}"
-              schema: "{{.schema_name}}"
-              {{- end}}
-              env: "${bundle.target}"
 
       {{- else if eq .job_type "dbt"}}
-
       tasks:
         - task_key: dbt_task
           {{- if eq .compute_type "serverless"}}
-          # Using serverless compute
           existing_cluster_id: ${var.serverless_cluster_id}
           {{- else}}
-          # Using classic compute with job cluster
           job_cluster_key: main_cluster
           {{- end}}
           dbt_task:
             project_directory: ../dbt
             commands:
               - "dbt run"
-            {{- if eq .enable_unity_catalog "yes"}}
-            catalog: "{{.catalog_name}}"
-            schema: "{{.schema_name}}"
-            {{- end}}
 
       {{- else if eq .job_type "spark_jar"}}
-
       tasks:
         - task_key: spark_jar_task
           {{- if eq .compute_type "serverless"}}
-          # Using serverless compute
           existing_cluster_id: ${var.serverless_cluster_id}
           {{- else}}
-          # Using classic compute with job cluster
           job_cluster_key: main_cluster
           {{- end}}
           spark_jar_task:
             main_class_name: com.{{.project_name}}.Main
-            parameters:
-              {{- if eq .enable_unity_catalog "yes"}}
-              - "--catalog={{.catalog_name}}"
-              - "--schema={{.schema_name}}"
-              {{- end}}
-              - "--env=${bundle.target}"
           libraries:
             - jar: ../target/{{.project_name}}.jar
       {{- end}}
 
       {{- if eq .compute_type "classic"}}
-
-      # Classic compute cluster configuration
       job_clusters:
         - job_cluster_key: main_cluster
           new_cluster:
@@ -101,51 +64,12 @@ resources:
             {{- if eq .cloud_provider "aws"}}
             aws_attributes:
               availability: SPOT_WITH_FALLBACK
-              zone_id: auto
             {{- else if eq .cloud_provider "azure"}}
             azure_attributes:
               availability: SPOT_WITH_FALLBACK_AZURE
-              first_on_demand: 1
-              spot_bid_max_price: -1
             {{- else if eq .cloud_provider "gcp"}}
             gcp_attributes:
               availability: PREEMPTIBLE_WITH_FALLBACK_GCP
-              google_service_account: ${var.service_account}
-            {{- end}}
-            spark_conf:
-              "spark.databricks.cluster.profile": "serverless"
-              "spark.databricks.repl.allowedLanguages": "python,sql"
-              {{- if eq .enable_unity_catalog "yes"}}
-              "spark.databricks.unityCatalog.enabled": "true"
-              {{- end}}
-            {{- if eq .enable_unity_catalog "yes"}}
-            data_security_mode: USER_ISOLATION
             {{- end}}
       {{- end}}
-
-      # Job scheduling - disabled in dev, enabled in prod
-      schedule:
-        quartz_cron_expression: "0 0 */6 * * ?"  # Every 6 hours
-        timezone_id: "America/Los_Angeles"
-        pause_status: PAUSED
-
-      # Email notifications
-      email_notifications:
-        on_failure:
-          - {{user_name}}
-
-      # Job timeout and retry configuration
-      timeout_seconds: 3600
-      max_retries: 2
-      min_retry_interval_millis: 60000
-      retry_on_timeout: true
-
-      # Tags for resource management
-      tags:
-        project: "{{.project_name}}"
-        managed_by: "databricks_asset_bundles"
-        environment: "${bundle.target}"
-        {{- if eq .enable_unity_catalog "yes"}}
-        catalog: "{{.catalog_name}}"
-        {{- end}}
 {{- end}}

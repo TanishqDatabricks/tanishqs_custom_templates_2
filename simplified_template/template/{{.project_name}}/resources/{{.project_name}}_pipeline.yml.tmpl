@@ -1,87 +1,31 @@
 {{- if eq .include_pipeline "yes"}}
 # Delta Live Tables Pipeline for {{.project_name}}
-# Pipeline Language: {{.pipeline_language}}
-# Compute: {{.compute_type}}
 resources:
   pipelines:
     {{.project_name}}_pipeline:
       name: {{.project_name}}_pipeline
-
-      {{- if eq .enable_unity_catalog "yes"}}
-      # Unity Catalog configuration
-      catalog: {{.catalog_name}}
-      target: {{.schema_name}}_${bundle.target}
-      {{- else}}
       target: {{.project_name}}_${bundle.target}
-      {{- end}}
 
       {{- if eq .pipeline_language "python"}}
-      # Python-based pipeline
       libraries:
         - notebook:
             path: ../src/dlt_pipeline.py
       {{- else}}
-      # SQL-based pipeline
       libraries:
         - notebook:
             path: ../src/dlt_pipeline.sql
       {{- end}}
 
       {{- if eq .compute_type "serverless"}}
-      # Using serverless compute for pipeline
       serverless: true
       {{- else}}
-      # Using classic compute for pipeline
       clusters:
         - label: default
-          {{- if eq .cluster_size "small"}}
           num_workers: 2
-          {{- else if eq .cluster_size "medium"}}
-          num_workers: 4
-          {{- else if eq .cluster_size "large"}}
-          num_workers: 8
-          {{- else}}
-          num_workers: 2
-          {{- end}}
-          node_type_id: {{template "node_type" .}}
-          aws_attributes:
-            availability: SPOT_WITH_FALLBACK
-            zone_id: auto
-          spark_conf:
-            spark.speculation: "true"
-            {{- if eq .enable_unity_catalog "yes"}}
-            spark.databricks.unityCatalog.enabled: "true"
-            {{- end}}
+          node_type_id: i3.xlarge
       {{- end}}
 
-      # Pipeline configuration
-      configuration:
-        project_name: "{{.project_name}}"
-        environment: "${bundle.target}"
-        {{- if eq .enable_unity_catalog "yes"}}
-        catalog: "{{.catalog_name}}"
-        schema: "{{.schema_name}}_${bundle.target}"
-        {{- end}}
-
-      # Development vs Production settings
-      development: ${ bundle.target == "dev" }
+      development: true
       continuous: false
-
-      # Storage location
-      {{- if eq .enable_unity_catalog "yes"}}
-      # Unity Catalog manages storage automatically
-      {{- else}}
-      storage: "/mnt/{{.project_name}}/dlt/${bundle.target}"
-      {{- end}}
-
-      # Pipeline notifications
-      notifications:
-        - email_recipients:
-            - {{user_name}}
-          alerts:
-            - "on-update-failure"
-            - "on-flow-failure"
-
-      # Channel for pipeline updates
       channel: CURRENT
 {{- end}}

@@ -57,54 +57,7 @@
             "enum": ["serverless", "classic"],
             "default": "serverless",
             "order": 6
-        },
-        "cluster_size": {
-            "type": "string",
-            "description": "What size cluster do you need?",
-            "enum": ["small", "medium", "large"],
-            "default": "small",
-            "order": 7,
-            "skip_prompt_if": {
-                "properties": {
-                    "compute_type": {
-                        "const": "serverless"
-                    }
-                }
-            }
-        },
-        "enable_unity_catalog": {
-            "type": "string",
-            "description": "Do you want to use Unity Catalog?",
-            "enum": ["yes", "no"],
-            "default": "yes",
-            "order": 8
-        },
-        "catalog_name": {
-            "type": "string",
-            "description": "What is the name of your Unity Catalog catalog?",
-            "default": "main",
-            "order": 9,
-            "skip_prompt_if": {
-                "properties": {
-                    "enable_unity_catalog": {
-                        "const": "no"
-                    }
-                }
-            }
-        },
-        "schema_name": {
-            "type": "string",
-            "description": "What is the name of your schema?",
-            "default": "default",
-            "order": 10,
-            "skip_prompt_if": {
-                "properties": {
-                    "enable_unity_catalog": {
-                        "const": "no"
-                    }
-                }
-            }
         }
     },
-    "success_message": "\n\u001b[1m\u001b[32mSuccess!\u001b[0m Your bundle '\u001b[1m{{.project_name}}\u001b[0m' has been created.\n\nNext steps:\n  1. cd {{.project_name}}\n  2. databricks bundle validate\n  3. databricks bundle deploy\n\nFor more information, visit: https://docs.databricks.com/dev-tools/bundles/\n"
+    "success_message": "\n\u001b[1m\u001b[32mSuccess!\u001b[0m Your bundle '\u001b[1m{{.project_name}}\u001b[0m' has been created.\n\nNext steps:\n  1. cd {{.project_name}}\n  2. databricks bundle validate\n  3. databricks bundle deploy\n"
 }

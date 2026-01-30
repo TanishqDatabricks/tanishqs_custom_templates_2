@@ -1,82 +1,24 @@
 # Databricks Asset Bundle Configuration for {{.project_name}}
-# Generated with Advanced Template
-# Cloud Provider: {{.cloud_provider}}
-# Compute Type: {{.compute_type}}
-{{- if eq .enable_unity_catalog "yes"}}
-# Unity Catalog: {{.catalog_name}}.{{.schema_name}}
-{{- end}}
 
 bundle:
   name: {{.project_name}}
-  {{- if eq .enable_unity_catalog "yes"}}
-
-  # Unity Catalog configuration
-  variables:
-    catalog:
-      description: "The Unity Catalog catalog name"
-      default: {{.catalog_name}}
-    schema:
-      description: "The Unity Catalog schema name"
-      default: {{.schema_name}}
-  {{- end}}
 
 include:
   - resources/*.yml
 
-{{- if eq .compute_type "serverless"}}
-
-# Workspace configuration for serverless compute
-workspace:
-  host: {{workspace_host}}
-{{- end}}
-
 targets:
-  # Development target - for testing and iteration
   dev:
     mode: development
     default: true
     workspace:
       host: {{workspace_host}}
-    {{- if eq .enable_unity_catalog "yes"}}
-    variables:
-      catalog: {{.catalog_name}}_dev
-      schema: {{.schema_name}}_dev
-    {{- end}}
 
-  # Staging target - for pre-production validation
-  staging:
-    mode: development
-    workspace:
-      host: {{workspace_host}}
-      root_path: /Shared/.bundle/staging/${bundle.name}
-    {{- if eq .enable_unity_catalog "yes"}}
-    variables:
-      catalog: {{.catalog_name}}_staging
-      schema: {{.schema_name}}_staging
-    {{- end}}
-    {{- if not is_service_principal}}
-    run_as:
-      # Staging runs as {{user_name}}
-      user_name: {{user_name}}
-    {{- end}}
-
-  # Production target - for production workloads
   prod:
     mode: production
     workspace:
       host: {{workspace_host}}
       root_path: /Shared/.bundle/prod/${bundle.name}
-    {{- if eq .enable_unity_catalog "yes"}}
-    variables:
-      catalog: {{.catalog_name}}
-      schema: {{.schema_name}}
-    {{- end}}
     {{- if not is_service_principal}}
     run_as:
-      # Production runs as {{user_name}}
-      # Consider using a service principal for production
       user_name: {{user_name}}
-    {{- else}}
-    run_as:
-      service_principal_name: ${var.service_principal_id}
     {{- end}}
