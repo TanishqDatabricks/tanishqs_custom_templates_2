@@ -1,0 +1,100 @@
+{{/* Custom template helpers for the advanced bundle template */}}
+
+{{/* Define spark version based on cloud provider */}}
+{{ define `spark_version` -}}
+{{- if eq .cloud_provider "aws" -}}
+15.4.x-scala2.12
+{{- else if eq .cloud_provider "azure" -}}
+15.4.x-scala2.12
+{{- else if eq .cloud_provider "gcp" -}}
+15.4.x-scala2.12
+{{- else -}}
+15.4.x-scala2.12
+{{- end -}}
+{{- end }}
+
+{{/* Define node type based on cloud provider and cluster size */}}
+{{ define `node_type` -}}
+{{- if eq .cloud_provider "aws" -}}
+  {{- if eq .cluster_size "small" -}}
+i3.xlarge
+  {{- else if eq .cluster_size "medium" -}}
+i3.2xlarge
+  {{- else if eq .cluster_size "large" -}}
+i3.4xlarge
+  {{- else -}}
+i3.xlarge
+  {{- end -}}
+{{- else if eq .cloud_provider "azure" -}}
+  {{- if eq .cluster_size "small" -}}
+Standard_DS3_v2
+  {{- else if eq .cluster_size "medium" -}}
+Standard_DS4_v2
+  {{- else if eq .cluster_size "large" -}}
+Standard_DS5_v2
+  {{- else -}}
+Standard_DS3_v2
+  {{- end -}}
+{{- else if eq .cloud_provider "gcp" -}}
+  {{- if eq .cluster_size "small" -}}
+n1-standard-4
+  {{- else if eq .cluster_size "medium" -}}
+n1-standard-8
+  {{- else if eq .cluster_size "large" -}}
+n1-standard-16
+  {{- else -}}
+n1-standard-4
+  {{- end -}}
+{{- else -}}
+i3.xlarge
+{{- end -}}
+{{- end }}
+
+{{/* Define catalog path for Unity Catalog */}}
+{{ define `catalog_path` -}}
+{{- if eq .enable_unity_catalog "yes" -}}
+{{.catalog_name}}.{{.schema_name}}
+{{- else -}}
+hive_metastore.default
+{{- end -}}
+{{- end }}
+
+{{/* Define driver node type - typically same as worker node for simplicity */}}
+{{ define `driver_node_type` -}}
+{{template "node_type" .}}
+{{- end }}
+
+{{/* Define number of workers based on cluster size */}}
+{{ define `num_workers` -}}
+{{- if eq .cluster_size "small" -}}
+2
+{{- else if eq .cluster_size "medium" -}}
+4
+{{- else if eq .cluster_size "large" -}}
+8
+{{- else -}}
+2
+{{- end -}}
+{{- end }}
+
+{{/* Define autoscaling configuration */}}
+{{ define `autoscale_config` -}}
+{{- if eq .cluster_size "small" -}}
+min_workers: 1
+max_workers: 3
+{{- else if eq .cluster_size "medium" -}}
+min_workers: 2
+max_workers: 6
+{{- else if eq .cluster_size "large" -}}
+min_workers: 4
+max_workers: 12
+{{- else -}}
+min_workers: 1
+max_workers: 3
+{{- end -}}
+{{- end }}
+
+{{/* Generate a unique identifier for resources */}}
+{{ define `resource_id` -}}
+{{.project_name}}_{{random_int 10000}}
+{{- end }}

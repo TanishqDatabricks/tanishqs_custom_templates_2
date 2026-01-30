@@ -1,0 +1,110 @@
+{
+    "welcome_message": "\n\u001b[1mWelcome to the Simplified Databricks Asset Bundle Template!\u001b[0m\nThis template will help you create a bundle with essential options.\n",
+    "properties": {
+        "project_name": {
+            "type": "string",
+            "default": "my_project",
+            "description": "What is the name of your project?",
+            "pattern": "^[a-zA-Z0-9_]{3,}$",
+            "pattern_match_failure_message": "Project name must be at least 3 characters long and can only contain letters, numbers, and underscores.",
+            "order": 1
+        },
+        "include_job": {
+            "type": "string",
+            "description": "Do you want to include a Databricks job in this bundle?",
+            "enum": ["yes", "no"],
+            "default": "yes",
+            "order": 2
+        },
+        "job_type": {
+            "type": "string",
+            "description": "What type of job do you want to create?",
+            "enum": ["python", "notebook"],
+            "default": "python",
+            "order": 3,
+            "skip_prompt_if": {
+                "properties": {
+                    "include_job": {
+                        "const": "no"
+                    }
+                }
+            }
+        },
+        "include_pipeline": {
+            "type": "string",
+            "description": "Do you want to include a Delta Live Tables pipeline?",
+            "enum": ["yes", "no"],
+            "default": "no",
+            "order": 4
+        },
+        "pipeline_language": {
+            "type": "string",
+            "description": "What language will your pipeline use?",
+            "enum": ["python", "sql"],
+            "default": "python",
+            "order": 5,
+            "skip_prompt_if": {
+                "properties": {
+                    "include_pipeline": {
+                        "const": "no"
+                    }
+                }
+            }
+        },
+        "compute_type": {
+            "type": "string",
+            "description": "Do you want to use serverless or classic compute?",
+            "enum": ["serverless", "classic"],
+            "default": "serverless",
+            "order": 6
+        },
+        "cluster_size": {
+            "type": "string",
+            "description": "What size cluster do you need?",
+            "enum": ["small", "medium", "large"],
+            "default": "small",
+            "order": 7,
+            "skip_prompt_if": {
+                "properties": {
+                    "compute_type": {
+                        "const": "serverless"
+                    }
+                }
+            }
+        },
+        "enable_unity_catalog": {
+            "type": "string",
+            "description": "Do you want to use Unity Catalog?",
+            "enum": ["yes", "no"],
+            "default": "yes",
+            "order": 8
+        },
+        "catalog_name": {
+            "type": "string",
+            "description": "What is the name of your Unity Catalog catalog?",
+            "default": "main",
+            "order": 9,
+            "skip_prompt_if": {
+                "properties": {
+                    "enable_unity_catalog": {
+                        "const": "no"
+                    }
+                }
+            }
+        },
+        "schema_name": {
+            "type": "string",
+            "description": "What is the name of your schema?",
+            "default": "default",
+            "order": 10,
+            "skip_prompt_if": {
+                "properties": {
+                    "enable_unity_catalog": {
+                        "const": "no"
+                    }
+                }
+            }
+        }
+    },
+    "success_message": "\n\u001b[1m\u001b[32mSuccess!\u001b[0m Your bundle '\u001b[1m{{.project_name}}\u001b[0m' has been created.\n\nNext steps:\n  1. cd {{.project_name}}\n  2. databricks bundle validate\n  3. databricks bundle deploy\n\nFor more information, visit: https://docs.databricks.com/dev-tools/bundles/\n"
+}
