@@ -4,7 +4,7 @@ Simple hello world example
 """
 
 def main():
-    # Create Spark session
+    # Create Spark sessioni k
     print('Hello from {{.project_name}}!')
 
 if __name__ == '__main__':

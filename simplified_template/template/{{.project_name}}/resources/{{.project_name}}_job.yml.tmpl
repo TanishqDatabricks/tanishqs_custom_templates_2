@@ -8,9 +8,7 @@ resources:
       {{- if eq .job_type "python"}}
       tasks:
         - task_key: main_task
-          {{- if eq .compute_type "serverless"}}
-          existing_cluster_id: ${var.serverless_cluster_id}
-          {{- else}}
+          {{- if eq .compute_type "classic"}}
           job_cluster_key: main_cluster
           {{- end}}
           spark_python_task:
@@ -19,9 +17,7 @@ resources:
       {{- else if eq .job_type "notebook"}}
       tasks:
         - task_key: notebook_task
-          {{- if eq .compute_type "serverless"}}
-          existing_cluster_id: ${var.serverless_cluster_id}
-          {{- else}}
+          {{- if eq .compute_type "classic"}}
           job_cluster_key: main_cluster
           {{- end}}
           notebook_task:
